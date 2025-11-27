@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Atracciones de Barranquilla — Proyecto Académico</title>
+<style>
+    :root{
+        --amarillo:#FCD116;
+        --rojo:#CE1126;
+        --azul:#0033A0;
+        --accent: #ff6f00;
+        --bg: #f6f7f9;
+        --card-shadow: 0 6px 18px rgba(17,24,39,0.08);
+        --glass: rgba(255,255,255,0.7);
+    }
+
+    /* Reset minimal */
+    *{box-sizing:border-box}
+    html,body{height:100%;}
+    body{
+        margin:0;
+        font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        background: linear-gradient(180deg,#fbfdff 0%, #f6f7f9 100%);
+        color:#12202b;
+        -webkit-font-smoothing:antialiased;
+        -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* Top header with Barranquilla colors */
+    .topbar{
+        background: linear-gradient(90deg, var(--amarillo) 0%, var(--rojo) 50%, var(--azul) 100%);
+        color:white;
+        padding:18px 20px;
+        display:flex;
+        align-items:center;
+        gap:18px;
+        justify-content:space-between;
+    }
+    .brand{
+        display:flex;
+        gap:12px;
+        align-items:center;
+    }
+    .logo {
+        width:52px;height:52px;border-radius:10px;
+        background: rgba(255,255,255,0.15);
+        display:flex;align-items:center;justify-content:center;
+        font-weight:800;font-size:18px;color:white;box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    }
+    .brand h1{margin:0;font-size:20px;letter-spacing:0.2px}
+    .brand p{margin:0;font-size:12px;opacity:0.95}
+
+    .top-actions{display:flex;gap:12px;align-items:center}
+    .btn{
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.12);
+        color:white;padding:8px 12px;border-radius:8px;
+        cursor:pointer;font-weight:600;backdrop-filter: blur(6px);
+    }
+    .btn:active{transform:translateY(1px)}
+
+    /* Layout: sidebar + main */
+    .layout{
+        display:grid;
+        grid-template-columns: 280px 1fr;
+        gap:24px;
+        max-width:1200px;
+        margin:28px auto;
+        padding:0 18px;
+    }
+
+    /* Sidebar */
+    .sidebar{
+        background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.85));
+        border-radius:12px;padding:18px;
+        box-shadow: var(--card-shadow);
+        height:fit-content;
+        position:sticky; top:24px;
+        transition: transform .35s ease, opacity .35s ease;
+    }
+    .sidebar h3{margin:6px 0 12px 0}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;cursor:pointer;color:#0b2a4a;font-weight:600}
+    .nav-item:hover{background: linear-gradient(90deg, rgba(0,51,160,0.06), rgba(254, 166, 0, 0.03));}
+
+    .toggle-sidebar{
+        display:none;
+        position:fixed;left:14px;top:84px;z-index:1200;
+        background:var(--azul);color:white;padding:10px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.16);
+    }
+
+    /* Main content */
+    main{min-height:60vh}
+    .controls{
+        display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px;
+    }
+
+    /* Search bar */
+    .search{
+        flex:1; max-width:640px; display:flex; gap:8px;
+    }
+    .search input{
+        width:100%;padding:12px 14px;border-radius:10px;border:1px solid #e0e6ef;background:white;
+        font-size:15px;box-shadow:0 4px 18px rgba(17,24,39,0.04);
+        outline:none;
+        transition: box-shadow .18s ease, transform .12s ease;
+    }
+    .search input:focus{box-shadow:0 10px 30px rgba(3,27,76,0.07);transform:translateY(-1px)}
+
+    .filters{display:flex;gap:8px;align-items:center}
+    .chip{padding:8px 10px;border-radius:999px;background:white;border:1px solid #e8edf6;font-weight:600;cursor:pointer}
+    .chip.active{background:linear-gradient(90deg,var(--amarillo),var(--rojo)); color:white;border:none}
+
+    /* Carousel */
+    .carousel{
+        position:relative;
+        border-radius:12px;overflow:hidden;margin-bottom:18px;box-shadow:var(--card-shadow);
+        height:300px;
+    }
+    .slides{display:flex;height:100%;transition:transform .6s cubic-bezier(.2,.9,.3,1)}
+    .slide{min-width:100%;height:100%;position:relative}
+    .slide img{width:100%;height:100%;object-fit:cover;display:block;filter: contrast(1.02) saturate(1.05)}
+    .carousel-caption{
+        position:absolute;left:18px;bottom:18px;background:linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.45));
+        color:white;padding:12px 14px;border-radius:10px;font-weight:700;
+        backdrop-filter: blur(4px);
+    }
+    .carousel-nav{
+        position:absolute;right:12px;bottom:12px;display:flex;gap:8px;
+    }
+    .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.5);cursor:pointer}
+    .dot.active{background:white;transform:scale(1.2)}
+
+    /* Grid cards */
+    .grid{
+        display:grid;
+        grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+        gap:20px;
+    }
+    .card{
+        background:white;border-radius:12px;overflow:hidden;box-shadow:var(--card-shadow);
+        transition: transform .25s ease, box-shadow .25s ease;
+        display:flex;flex-direction:column;
+    }
+    .card:hover{transform:translateY(-6px);box-shadow: 0 18px 40px rgba(9,30,66,0.10);}
+    .card img{width:100%;height:170px;object-fit:cover;display:block}
+    .card-body{padding:14px;flex:1;display:flex;flex-direction:column}
+    .card-body h4{margin:0 0 8px 0;color:var(--azul)}
+    .meta{font-size:13px;color:#4b5966;margin-top:auto;display:flex;justify-content:space-between;align-items:center}
+
+    /* Map container */
+    .map-card{margin-top:18px;border-radius:12px;overflow:hidden;box-shadow:var(--card-shadow);height:360px}
+
+    /* Footer */
+    footer{
+        margin-top:36px;background:#0b1b2e;color:white;padding:28px 18px;border-radius:12px;max-width:1200px;margin-left:auto;margin-right:auto;
+    }
+    .footer-grid{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between}
+    .footer-col{min-width:180px;flex:1}
+    .footer-col h5{margin:0 0 10px 0}
+    .socials{display:flex;gap:8px;margin-top:10px}
+    .social{background:white;color:#0b1b2e;padding:8px 10px;border-radius:8px;font-weight:700}
+
+    /* Responsive */
+    @media (max-width:980px){
+        .layout{grid-template-columns: 1fr; padding:0 14px}
+        .sidebar{position:relative;top:0;}
+        .toggle-sidebar{display:block}
+        .top-actions{display:none}
+    }
+
+    /* small animations */
+    @keyframes floatUp { from {transform:translateY(10px);opacity:0} to {transform:none;opacity:1} }
+    .animate { animation: floatUp .45s ease both; }
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+    <div class="brand">
+        <div class="logo">B</div>
+        <div>
+            <h1>Atracciones — Barranquilla</h1>
+            <p>Guía visual de los lugares más visitados</p>
+        </div>
+    </div>
+
+    <div class="top-actions">
+        <button class="btn" id="openSidebar">☰ Menú</button>
+        <button class="btn" id="openMap">Ver en mapa</button>
+    </div>
+</div>
+
+<!-- Toggle button for small screens -->
+<button class="toggle-sidebar" id="toggleSidebarMobile">☰</button>
+
+<div class="layout" id="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <h3>Explorar</h3>
+        <div class="nav-item" data-filter="all">• Todas las atracciones</div>
+        <div class="nav-item" data-filter="cultural">• Cultura y festivales</div>
+        <div class="nav-item" data-filter="naturaleza">• Naturaleza</div>
+        <div class="nav-item" data-filter="infra">• Infraestructura</div>
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid #eef3fb" />
+
+        <h3>Información</h3>
+        <p style="font-size:13px;color:#334E6F;margin:0 0 10px 0">
+            Esta página es una recreación académica inspirada en recursos públicos.
+        </p>
+
+        <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="chip" id="resetFilters">Reset</button>
+            <button class="chip" id="toggleAnim">Animaciones</button>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main>
+        <!-- Controls -->
+        <div class="controls">
+            <div class="search">
+                <input id="search" placeholder="Buscar atracción (ej: 'malecón', 'zoológico', 'carnaval')" />
+            </div>
+            <div class="filters">
+                <div class="chip" data-cat="popular">Más populares</div>
+                <div class="chip" data-cat="near">Cercanas</div>
+            </div>
+        </div>
+
+        <!-- Carousel -->
+        <div class="carousel animate" id="carousel">
+            <div class="slides" id="slides">
+                <div class="slide">
+                    <img alt="Gran Malecón" src="https://media-cdn.tripadvisor.com/media/photo-s/15/6b/1f/46/gran-malecon.jpg" loading="lazy">
+                    <div class="carousel-caption">Gran Malecón del Río — Paseo y restaurantes</div>
+                </div>
+                <div class="slide">
+                    <img alt="Carnaval" src="https://media-cdn.tripadvisor.com/media/photo-s/11/66/1c/1f/carnaval-de-barranquilla.jpg" loading="lazy">
+                    <div class="carousel-caption">Carnaval de Barranquilla — Cultura y fiesta</div>
+                </div>
+                <div class="slide">
+                    <img alt="Zoológico" src="https://media-cdn.tripadvisor.com/media/photo-s/0d/1b/27/ec/zoologico-de-barranquilla.jpg" loading="lazy">
+                    <div class="carousel-caption">Zoológico — Plan familiar</div>
+                </div>
+            </div>
+
+            <div class="carousel-nav" id="carouselNav"></div>
+        </div>
+
+        <!-- Grid of attractions -->
+        <section class="grid" id="grid">
+
+            <!-- Card 1 -->
+            <article class="card animate" data-name="gran malecon malecon rio paseo malecón" data-type="popular,naturaleza">
+                <img alt="Gran Malecón" src="https://media-cdn.tripadvisor.com/media/photo-s/15/6b/1f/46/gran-malecon.jpg" loading="lazy">
+                <div class="card-body">
+                    <h4>Gran Malecón del Río</h4>
+                    <div class="meta">
+                        <span>Río Magdalena — Paseo</span>
+                        <small>⭐ 4.6</small>
+                    </div>
+                    <p style="margin-top:10px;">Zona peatonal moderna con restaurantes, áreas para eventos y una vista privilegiada del río.</p>
+                </div>
+            </article>
+
+            <!-- Card 2 -->
+            <article class="card animate" data-name="zoologico zoo animales fauna barranquilla" data-type="naturaleza,popular">
+                <img alt="Zoológico" src="https://media-cdn.tripadvisor.com/media/photo-s/0d/1b/27/ec/zoologico-de-barranquilla.jpg" loading="lazy">
+                <div class="card-body">
+                    <h4>Zoológico de Barranquilla</h4>
+                    <div class="meta">
+                        <span>Familia — Educación</span><small>⭐ 4.4</small>
+                    </div>
+                    <p style="margin-top:10px;">Colección de fauna nacional e internacional, actividades educativas para niños y recorridos guiados.</p>
+                </div>
+            </article>
+
+            <!-- Card 3 -->
+            <article class="card animate" data-name="carnaval fiesta folclore cultura comparsas" data-type="cultural,popular">
+                <img alt="Carnaval" src="https://media-cdn.tripadvisor.com/media/photo-s/11/66/1c/1f/carnaval-de-barranquilla.jpg" loading="lazy">
+                <div class="card-body">
+                    <h4>Carnaval de Barranquilla</h4>
+                    <div class="meta"><span>Evento cultural</span><small>⭐ 5.0</small></div>
+                    <p style="margin-top:10px;">Evento anual con desfiles, música y tradiciones. Declarado Patrimonio Cultural Inmaterial.</p>
+                </div>
+            </article>
+
+            <!-- Card 4 -->
+            <article class="card animate" data-name="puente pumarejo puente rio" data-type="infra">
+                <img alt="Puente Pumarejo" src="https://media-cdn.tripadvisor.com/media/photo-s/12/e4/70/77/puente-pumarejo.jpg" loading="lazy">
+                <div class="card-body">
+                    <h4>Puente Pumarejo</h4>
+                    <div class="meta"><span>Infraestructura</span><small>⭐ 4.3</small></div>
+                    <p style="margin-top:10px;">Imponente estructura que conecta regiones; ofrece vistas panorámicas del río y la ciudad.</p>
+                </div>
+            </article>
+
+            <!-- Card 5 -->
+            <article class="card animate" data-name="museo del caribe museo cultura historia" data-type="cultural">
+                <img alt="Museo del Caribe" src="https://media-cdn.tripadvisor.com/media/photo-s/13/8d/1a/6b/museo-del-caribe.jpg" loading="lazy">
+                <div class="card-body">
+                    <h4>Museo del Caribe</h4>
+                    <div class="meta"><span>Museo — Cultura</span><small>⭐ 4.5</small></div>
+                    <p style="margin-top:10px;">Centro de interpretación de la riqueza cultural y natural del Caribe colombiano.</p>
+                </div>
+            </article>
+
+            <!-- Card 6 -->
+            <article class="card animate" data-name="parque del agua parque recreacion infantil" data-type="naturaleza">
+                <img alt="Parque del Agua" src="https://media-cdn.tripadvisor.com/media/photo-s/1a/9a/2b/88/parque-del-agua.jpg" loading="lazy">
+                <div class="card-body">
+                    <h4>Parque del Agua</h4>
+                    <div class="meta"><span>Recreación</span><small>⭐ 4.2</small></div>
+                    <p style="margin-top:10px;">Espacios verdes y zonas recreativas para niños y familias, con fuentes y senderos.</p>
+                </div>
+            </article>
+
+            <!-- Card 7 -->
+            <article class="card animate" data-name="teatro amira de la rosa teatro eventos cultura" data-type="cultural">
+                <img alt="Teatro Amira de la Rosa" src="https://media-cdn.tripadvisor.com/media/photo-s/14/7e/5a/11/amira-de-la-rosa.jpg" loading="lazy">
+                <div class="card-body">
+                    <h4>Teatro Amira de la Rosa</h4>
+                    <div class="meta"><span>Teatro — Eventos</span><small>⭐ 4.1</small></div>
+                    <p style="margin-top:10px;">Escenario principal para artes escénicas en la ciudad con programación cultural variada.</p>
+                </div>
+            </article>
+
+            <!-- Card 8 -->
+            <article class="card animate" data-name="centro historico barrio antiguo colonias arquitectura" data-type="cultural">
+                <img alt="Centro Histórico" src="https://media-cdn.tripadvisor.com/media/photo-s/1b/2c/3d/50/centro-historico.jpg" loading="lazy">
+                <div class="card-body">
+                    <h4>Centro Histórico</h4>
+                    <div class="meta"><span>Paseo histórico</span><small>⭐ 4.0</small></div>
+                    <p style="margin-top:10px;">Calles con historia, fachadas coloniales y oferta gastronómica tradicional.</p>
+                </div>
+            </article>
+
+        </section>
+
+        <!-- Map -->
+        <div class="map-card animate" id="mapCard" style="margin-top:18px;">
+            <!-- Embeded map to Barranquilla -->
+            <iframe
+                id="mapframe"
+                title="Mapa de Barranquilla"
+                src="https://www.google.com/maps?q=Barranquilla,Colombia&output=embed"
+                width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy">
+            </iframe>
+        </div>
+
+    </main>
+</div>
+
+<!-- Footer -->
+<footer>
+    <div class="footer-grid">
+        <div class="footer-col">
+            <h5>Atracciones — Barranquilla</h5>
+            <p style="color:#c9d8ea;margin-top:6px">Guía académica creada en 2025. Imágenes y referencias públicas usadas para un proyecto estudiantil.</p>
+        </div>
+
+        <div class="footer-col">
+            <h5>Enlaces útiles</h5>
+            <p style="color:#c9d8ea;margin:6px 0">Turismo • Cultura • Eventos • Contacto</p>
+        </div>
+
+        <div class="footer-col">
+            <h5>Contacto</h5>
+            <p style="color:#c9d8ea;margin:6px 0">proyecto@universidad.edu</p>
+            <div class="socials">
+                <div class="social">FB</div>
+                <div class="social">IG</div>
+                <div class="social">TW</div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+/* ===== Sidebar toggle (small screens) ===== */
+const sidebar = document.getElementById('sidebar');
+const toggleBtn = document.getElementById('toggleSidebarMobile');
+const openSidebar = document.getElementById('openSidebar');
+toggleBtn?.addEventListener('click', ()=> {
+    sidebar.style.display = sidebar.style.display === 'none' || !sidebar.style.display ? 'block' : 'none';
+});
+openSidebar?.addEventListener('click', ()=> {
+    // on wide screens, scroll to sidebar
+    sidebar.scrollIntoView({behavior:'smooth'});
+});
+
+/* ===== Search filter (realtime) ===== */
+const searchInput = document.getElementById('search');
+const cards = Array.from(document.querySelectorAll('.card'));
+searchInput.addEventListener('input', (e)=>{
+    const q = e.target.value.trim().toLowerCase();
+    cards.forEach(c=>{
+        const name = c.dataset.name || '';
+        c.style.display = name.includes(q) ? 'flex' : 'none';
+    });
+});
+
+/* ===== Category filter from sidebar ===== */
+document.querySelectorAll('.nav-item').forEach(item=>{
+    item.addEventListener('click', ()=>{
+        const f = item.dataset.filter;
+        if(f === 'all') {
+            cards.forEach(c=> c.style.display = 'flex');
+        } else {
+            cards.forEach(c=>{
+                const types = (c.dataset.type || '').split(',');
+                c.style.display = types.includes(f) ? 'flex' : 'none';
+            });
+        }
+    });
+});
+
+/* ===== Reset & animation toggle ===== */
+document.getElementById('resetFilters').addEventListener('click', ()=>{
+    document.getElementById('search').value = '';
+    cards.forEach(c=> c.style.display = 'flex');
+});
+let animEnabled = true;
+document.getElementById('toggleAnim').addEventListener('click', (e)=>{
+    animEnabled = !animEnabled;
+    document.querySelectorAll('.animate').forEach(el=>{
+        el.style.animation = animEnabled ? '' : 'none';
+    });
+    e.target.textContent = animEnabled ? 'Animaciones' : 'Animaciones OFF';
+});
+
+/* ===== Small chips filter (dummy behavior) ===== */
+document.querySelectorAll('.chip[data-cat]').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+        // Toggle active styling
+        chip.classList.toggle('active');
+        // (Optional) you could filter by "popular" or "near" here.
+    });
+});
+
+/* ===== Simple carousel implementation ===== */
+const slidesEl = document.getElementById('slides');
+const slideCount = slidesEl.children.length;
+let current = 0;
+const nav = document.getElementById('carouselNav');
+
+function renderDots(){
+    for(let i=0;i<slideCount;i++){
+        const d = document.createElement('div');
+        d.className = 'dot' + (i===0? ' active':'');
+        d.addEventListener('click', ()=> gotoSlide(i));
+        nav.appendChild(d);
+    }
+}
+function gotoSlide(i){
+    current = i;
+    slidesEl.style.transform = `translateX(-${i*100}%)`;
+    Array.from(nav.children).forEach((dot,idx)=> dot.classList.toggle('active', idx===i));
+}
+function nextSlide(){
+    current = (current+1) % slideCount;
+    gotoSlide(current);
+}
+renderDots();
+let carouselTimer = setInterval(nextSlide, 4500);
+
+// Pause on hover
+document.getElementById('carousel').addEventListener('mouseenter', ()=> clearInterval(carouselTimer));
+document.getElementById('carousel').addEventListener('mouseleave', ()=> carouselTimer = setInterval(nextSlide,4500));
+
+/* ===== Map button scroll to map ===== */
+document.getElementById('openMap').addEventListener('click', ()=> {
+    document.getElementById('mapCard').scrollIntoView({behavior:'smooth'});
+});
+
+/* ===== Accessibility: keyboard navigation for dots ===== */
+nav.addEventListener('keydown', (e)=>{
+    if(e.key === 'ArrowLeft') gotoSlide((current-1+slideCount)%slideCount);
+    if(e.key === 'ArrowRight') gotoSlide((current+1)%slideCount);
+});
+
+/* ===== Small: reveal animations on scroll (simple) ===== */
+const revealEls = document.querySelectorAll('.animate');
+const obs = new IntersectionObserver((entries)=>{
+    entries.forEach(en=>{
+        if(en.isIntersecting) {
+            en.target.style.opacity = 1;
+            en.target.style.transform = 'none';
+        } else {
+            // keep visible once revealed
+        }
+    });
+},{threshold:.12});
+revealEls.forEach(el=> {
+    el.style.opacity = 0; el.style.transform = 'translateY(12px)';
+    obs.observe(el);
+});
+</script>
+</body>
+</html>
